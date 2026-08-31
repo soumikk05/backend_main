@@ -1,0 +1,66 @@
+# ============================================================
+# AI-Based Fake Identity & Document Screening System — Backend
+# requirements.txt
+# ============================================================
+
+# ---- Core API ----
+fastapi==0.111.0
+uvicorn[standard]==0.30.1
+python-multipart==0.0.9
+pydantic==2.7.4
+python-dotenv==1.0.1
+cryptography==42.0.8
+
+# ---- Database & Audit Trail ----
+sqlalchemy==2.0.30
+
+# ---- OCR ----
+pytesseract==0.3.10
+easyocr==1.7.1
+passporteye==2.2.2
+
+# ---- Image processing / tampering detection ----
+opencv-python==4.10.0.84
+pillow==10.4.0
+exifread==3.0.0
+numpy==1.26.4
+
+# ---- Face verification ----
+deepface==0.0.92
+tensorflow==2.15.0
+tf-keras==2.15.0
+
+# ---- Validation / misc ----
+scikit-learn==1.5.0
+python-dateutil==2.9.0.post0
+
+# ---- Testing ----
+pytest==8.2.2
+httpx==0.27.0
+
+# ============================================================
+# WINDOWS SETUP — READ BEFORE RUNNING pip install
+# ============================================================
+#
+# 1) TESSERACT BINARY (required, not installed by pip):
+#    pytesseract/passporteye only call the `tesseract` executable — they
+#    don't ship it. Without this, MRZ passport reads silently fall through
+#    to the EasyOCR fallback every time (no crash, just no checksum path).
+#      -> Install: https://github.com/UB-Mannheim/tesseract/wiki
+#      -> Add its install folder (contains tesseract.exe) to your PATH
+#      -> Verify with: tesseract --version
+#
+# 2) PYTHON VERSION:
+#    Use Python 3.10 or 3.11. TensorFlow 2.16 / DeepFace can be flaky on
+#    3.12 on Windows. Check with: python --version
+#
+# 3) DEEPFACE / TENSORFLOW MODEL WEIGHTS:
+#    First call to DeepFace.verify() auto-downloads VGG-Face weights
+#    (~500MB) from the internet. Do this once, BEFORE your demo:
+#      python -c "from deepface import DeepFace; DeepFace.build_model('VGG-Face')"
+#
+# 4) EASYOCR MODEL WEIGHTS:
+#    Also auto-downloads (~100MB) on first use. Warm up in advance:
+#      python -c "import easyocr; easyocr.Reader(['en'], gpu=False)"
+#
+# ============================================================

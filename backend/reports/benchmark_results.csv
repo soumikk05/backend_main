@@ -1,0 +1,8 @@
+Metric,Value_ms
+runs,3
+successful_runs,3
+mean,7876.84
+p50_median,4335.75
+p95,14039.9
+min,4176.64
+max,15118.14

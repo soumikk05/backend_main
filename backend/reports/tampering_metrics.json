@@ -1,0 +1,50 @@
+{
+  "status": "evaluated",
+  "dataset_split": "held_out_test",
+  "test_seed": 42,
+  "num_samples": 5068,
+  "held_out_genuine_images": 3379,
+  "held_out_real_tampered_images": 0,
+  "generated_synthetic_tampered_images": 3379,
+  "test_accuracy": 0.9076558800315706,
+  "classification_report": {
+    "genuine": {
+      "precision": 0.7864852182074143,
+      "recall": 0.9923031379514505,
+      "f1-score": 0.8774869109947644,
+      "support": 1689.0
+    },
+    "tampered": {
+      "precision": 0.9955737146748382,
+      "recall": 0.8653447765611127,
+      "f1-score": 0.9259024699176694,
+      "support": 3379.0
+    },
+    "accuracy": 0.9076558800315706,
+    "macro avg": {
+      "precision": 0.8910294664411262,
+      "recall": 0.9288239572562816,
+      "f1-score": 0.9016946904562169,
+      "support": 5068.0
+    },
+    "weighted avg": {
+      "precision": 0.9258913013888321,
+      "recall": 0.9076558800315706,
+      "f1-score": 0.9097671346728418,
+      "support": 5068.0
+    }
+  },
+  "confusion_matrix": [
+    [
+      1676,
+      13
+    ],
+    [
+      455,
+      2924
+    ]
+  ],
+  "decision_threshold": 0.5,
+  "framework": "pytorch/torchvision",
+  "weights_path": "C:\\Users\\soumi\\OneDrive\\Desktop\\GIT REPO\\sih-round2-2026\\backend\\app\\models\\weights\\forgery_mobilenet_v2.pt"
+}

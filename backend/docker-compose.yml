@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  docscreen-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: docscreen-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8000
+      - DATABASE_URL=sqlite:///dataset/screening.db
+      - CORS_ALLOWED_ORIGINS=*
+      - MAX_UPLOAD_SIZE_MB=15
+    volumes:
+      - ./dataset:/app/dataset
+      - deepface_weights:/root/.deepface/weights
+    restart: unless-stopped
+
+volumes:
+  deepface_weights:

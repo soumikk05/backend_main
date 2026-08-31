@@ -1,0 +1,16 @@
+{
+  "runs": 3,
+  "successful_runs": 3,
+  "status_codes": [
+    200,
+    200,
+    200
+  ],
+  "mean_ms": 7876.84,
+  "median_p50_ms": 4335.75,
+  "p95_ms": 14039.9,
+  "min_ms": 4176.64,
+  "max_ms": 15118.14,
+  "under_5_seconds": false,
+  "stage_breakdowns": {}
+}

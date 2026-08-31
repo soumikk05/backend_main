@@ -1,0 +1,12 @@
+metric,value
+accuracy,0.9076558800315706
+genuine_precision,0.7864852182074143
+genuine_recall,0.9923031379514505
+genuine_f1,0.8774869109947644
+tampered_precision,0.9955737146748382
+tampered_recall,0.8653447765611127
+tampered_f1,0.9259024699176694
+true_genuine,1676
+false_tampered_alert,13
+missed_tampered,455
+true_tampered,2924
