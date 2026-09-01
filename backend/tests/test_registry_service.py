@@ -52,3 +52,39 @@ def test_duplicate_identity_detection(db_session):
     dup_res = check_duplicate_identity("DOC12345", "BOB JONES", "hash_bbb", db_session)
     assert dup_res["is_duplicate"] is True
     assert any("DUPLICATE IDENTITY" in f for f in dup_res["flags"])
+
+
+def test_duplicate_identity_dob_mismatch(db_session):
+    # Seed historical screening record
+    db_session.add(
+        ScreeningRecord(
+            document_type="passport",
+            document_number="X1234567",
+            holder_name="JOHN DOE",
+            date_of_birth="1990-05-12",
+            risk_score=5.0,
+            risk_label="LOW",
+        )
+    )
+    db_session.commit()
+
+    # Same doc number, SAME name, DIFFERENT DOB
+    result = check_duplicate_identity(
+        document_number="X1234567",
+        holder_name="JOHN DOE",
+        image_hash=None,
+        db=db_session,
+        date_of_birth="1985-11-03",
+    )
+    assert result["is_duplicate"] is True
+    assert any("DOB MISMATCH" in f for f in result["flags"])
+
+    # Identical record should NOT be flagged
+    result2 = check_duplicate_identity(
+        document_number="X1234567",
+        holder_name="JOHN DOE",
+        image_hash=None,
+        db=db_session,
+        date_of_birth="1990-05-12",
+    )
+    assert result2["is_duplicate"] is False

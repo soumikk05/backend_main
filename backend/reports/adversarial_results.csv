@@ -1,9 +1,0 @@
-perturbation,num_evaluated,avg_classifier_confidence,avg_tampering_score,tampering_detection_rate
-blur,5,0.0,34.228,1.0
-noise,5,0.0,36.794,1.0
-screenshot,5,0.0,36.084,1.0
-print_photo,5,0.0,34.43,1.0
-darkness,5,0.0,34.07,1.0
-overexposure,5,0.0,34.056,1.0
-heavy_compression,5,0.0,34.004,1.0
-perspective_skew,5,0.0,34.764,1.0

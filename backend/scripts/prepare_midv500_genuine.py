@@ -27,9 +27,9 @@ def detect_category(folder_name: str) -> str:
     if "passport" in name:
         return "passport"
     if "drvlic" in name or "license" in name or "licence" in name:
-        return "license"
+        return "driving_license"
     if "id" in name:  # check after passport/drvlic so e.g. "id" inside other words doesn't misfire
-        return "id"
+        return "national_id"
     return "unknown"
 
 
@@ -79,7 +79,7 @@ def main(midv_root: str, out_root: str, per_category: int):
             print(f"  {z.name}  (unzip with: unzip \"{z}\" -d \"{z.with_suffix('')}\"  or right-click > Extract All on Windows)")
         print()
 
-    category_counts = {"passport": 0, "id": 0, "license": 0}
+    category_counts = {"passport": 0, "national_id": 0, "driving_license": 0}
     skipped_unknown = []
 
     for folder in sorted(midv_root_path.iterdir()):
@@ -108,7 +108,7 @@ def main(midv_root: str, out_root: str, per_category: int):
     print(f"  genuine/visa: 0 images  (MIDV-500 has no visa documents — needs a separate source)")
 
     if skipped_unknown:
-        print(f"\nSkipped {len(skipped_unknown)} folder(s) that didn't match passport/id/license naming "
+        print(f"\nSkipped {len(skipped_unknown)} folder(s) that didn't match passport/national_id/driving_license naming "
               f"(e.g. permits, home-return documents): {', '.join(skipped_unknown[:5])}"
               + (" ..." if len(skipped_unknown) > 5 else ""))
         print("These aren't lost — they're just not auto-categorized. Review manually if you want to use them.")

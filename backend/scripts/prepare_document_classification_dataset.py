@@ -2,9 +2,11 @@ import os
 import csv
 import random
 import cv2
+import argparse
+from pathlib import Path
 
-# Root path for raw MIDV500 TIF files
-MIDV_DIR = 'd:/backend-scaffold (2)/backend/midv500_data/midv500'
+# Root path for raw MIDV500 TIF files (default)
+DEFAULT_MIDV_DIR = 'midv500_data/midv500'
 OUT_DIR = 'dataset/document_classification'
 
 # Class mapping: map folder names to our 4 target document classes
@@ -20,14 +22,23 @@ CLASS_MAP = {
 }
 
 def main():
+    parser = argparse.ArgumentParser(description="Prepare document classification dataset")
+    parser.add_argument("--midv_dir", default=DEFAULT_MIDV_DIR, help="Path to MIDV-500 extracted images")
+    args = parser.parse_args()
+
+    # Resolve midv_dir relative to the backend root (parent of scripts/)
+    backend_root = Path(__file__).resolve().parent.parent
+    midv_dir_path = backend_root / args.midv_dir
+
     print("=== PREPARING DOCUMENT CLASSIFICATION DATASET ===")
-    if not os.path.exists(MIDV_DIR):
-        print("Error: midv500_data directory not found!")
+    if not midv_dir_path.exists():
+        print(f"Error: midv500_data directory not found at {midv_dir_path}!")
         return
 
     os.makedirs(OUT_DIR, exist_ok=True)
-    for c in ['passport', 'national_id', 'driving_license', 'permit', 'visa']:
+    for c in ['passport', 'national_id', 'driving_license', 'permit']:
         os.makedirs(os.path.join(OUT_DIR, c), exist_ok=True)
+    print("Note: 'visa' is supported by the backend but MIDV-500 lacks visa source data.")
 
     # Collect images
     all_records = []
@@ -36,7 +47,7 @@ def main():
     random.seed(42)
 
     for folder, doc_type in CLASS_MAP.items():
-        folder_path = os.path.join(MIDV_DIR, folder)
+        folder_path = os.path.join(midv_dir_path, folder)
         if not os.path.exists(folder_path):
             continue
         
@@ -75,7 +86,7 @@ def main():
             img = cv2.imread(src_path)
             if img is not None:
                 cv2.imwrite(dest_path, img)
-                relative_dest_path = os.path.relpath(dest_path, 'd:/backend-scaffold (2)/backend')
+                relative_dest_path = os.path.relpath(dest_path, str(backend_root))
                 all_records.append({
                     'image_path': relative_dest_path.replace('\\', '/'),
                     'document_type': doc_type,
