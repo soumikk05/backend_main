@@ -6,7 +6,7 @@
     "training_date": "2026-08-26",
     "dataset_version": "midv500_v1",
     "status": "trained",
-    "path": "models/document_classifier.keras"
+    "path": "ml_artifacts/document_classifier.keras"
   },
   "forgery_mobilenet_v2": {
     "model_name": "forgery_mobilenet_v2",

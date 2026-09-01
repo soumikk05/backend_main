@@ -9,17 +9,17 @@ from pathlib import Path
 DEFAULT_MIDV_DIR = 'midv500_data/midv500'
 OUT_DIR = 'dataset/document_classification'
 
-# Class mapping: map folder names to our 4 target document classes
-CLASS_MAP = {
-    '01_alb_id': 'national_id',
-    '03_aut_id_old': 'national_id',
-    '04_aut_id': 'national_id',
-    '07_chl_id': 'national_id',
-    '02_aut_drvlic_new': 'driving_license',
-    '05_aze_passport': 'passport',
-    '06_bra_passport': 'passport',
-    '08_chn_homereturn': 'permit',
-}
+def classify_folder(folder_name: str) -> str | None:
+    name = folder_name.lower()
+    if "passport" in name:
+        return "passport"
+    if "drvlic" in name or "license" in name or "licence" in name:
+        return "driving_license"
+    if "homereturn" in name or "bordercrossing" in name:
+        return "permit"
+    if "id" in name:
+        return "national_id"
+    return None  # unmapped, skip
 
 def main():
     parser = argparse.ArgumentParser(description="Prepare document classification dataset")
@@ -46,10 +46,19 @@ def main():
     # Random seed for reproducibility
     random.seed(42)
 
-    for folder, doc_type in CLASS_MAP.items():
+    class_counts = {'passport': 0, 'national_id': 0, 'driving_license': 0, 'permit': 0}
+    source_folder_counts = {'passport': 0, 'national_id': 0, 'driving_license': 0, 'permit': 0}
+
+    for folder in os.listdir(midv_dir_path):
         folder_path = os.path.join(midv_dir_path, folder)
-        if not os.path.exists(folder_path):
+        if not os.path.isdir(folder_path):
             continue
+        
+        doc_type = classify_folder(folder)
+        if not doc_type:
+            continue
+        
+        source_folder_counts[doc_type] += 1
         
         tif_files = []
         for r, dirs, files in os.walk(folder_path):
@@ -92,6 +101,7 @@ def main():
                     'document_type': doc_type,
                     'split': split
                 })
+                class_counts[doc_type] += 1
 
     # Write manifest CSV
     manifest_path = os.path.join(OUT_DIR, 'manifest.csv')
@@ -102,6 +112,10 @@ def main():
 
     print(f"Dataset prepared. Total images copied: {len(all_records)}")
     print(f"Manifest saved to: {manifest_path}")
+    
+    print("\n=== Category Summary ===")
+    for c in ['passport', 'national_id', 'driving_license', 'permit']:
+        print(f"  {c.ljust(15)}: {source_folder_counts.get(c, 0)} source folders, {class_counts.get(c, 0)} images")
 
 if __name__ == '__main__':
     main()

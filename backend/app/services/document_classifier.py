@@ -14,7 +14,7 @@ LABELS = ["passport", "visa", "national_id", "driving_license", "permit"]
 @lru_cache(maxsize=1)
 def _load_model():
     """Load a locally provisioned TensorFlow classifier only; never downloads at runtime."""
-    path = Path(__file__).resolve().parents[2] / "models" / "document_classifier.keras"
+    path = Path(__file__).resolve().parents[2] / "ml_artifacts" / "document_classifier.keras"
     if not path.exists():
         return None
     try:

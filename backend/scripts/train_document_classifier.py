@@ -8,7 +8,7 @@ from tensorflow import keras
 from keras import layers, models
 
 MANIFEST_PATH = 'dataset/document_classification/manifest.csv'
-MODEL_SAVE_PATH = 'models/document_classifier.keras'
+MODEL_SAVE_PATH = 'ml_artifacts/document_classifier.keras'
 REPORTS_DIR = 'reports'
 METRICS_SAVE_PATH = os.path.join(REPORTS_DIR, 'classifier_metrics.json')
 
@@ -56,7 +56,7 @@ def load_data_from_manifest():
 
 def main():
     print("=== TRAINING DOCUMENT CLASSIFIER ===")
-    os.makedirs('models', exist_ok=True)
+    os.makedirs('ml_artifacts', exist_ok=True)
     os.makedirs(REPORTS_DIR, exist_ok=True)
 
     if not os.path.exists(MANIFEST_PATH):

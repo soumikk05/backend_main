@@ -8,5 +8,8 @@ backend/midv500_data/
 dataset/
 midv500_data/
 *.db
-reports/
 backend/reports/
+*.pt
+*.keras
+*.h5
+*.onnx

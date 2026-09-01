@@ -192,18 +192,32 @@ def compute_risk_score(
 
 
 def _score_validation(result: Optional[Dict[str, Any]]) -> tuple[float, List[str]]:
+    """
+    Weights failed checks by severity (HIGH/MEDIUM/LOW) rather than treating every
+    check equally. Equal-weighting made the score depend on how many checks happened
+    to run for a given document type (e.g. 8 for MRZ-backed passports vs 3-4 for
+    fallback national IDs) rather than on how serious the actual failure was —
+    the same single HIGH-severity failure could score 2-3x differently purely
+    because of document type. Severity weighting keeps scores comparable across
+    document types since it normalizes by total possible severity weight, not
+    raw check count.
+    """
     flags: List[str] = []
     if not result or not result.get("checks"):
         return 0.0, flags
 
+    severity_weight = {"HIGH": 3.0, "MEDIUM": 2.0, "LOW": 1.0}
+
     checks = result["checks"]
     failed = [c for c in checks if not c.get("passed")]
-    total = len(checks)
 
     for check in failed:
         flags.append(f"Validation: {check.get('message', check.get('reason', check.get('name')))}")
 
-    component = (len(failed) / total * 100.0) if total > 0 else 0.0
+    total_weight = sum(severity_weight.get(c.get("severity", "MEDIUM"), 2.0) for c in checks)
+    failed_weight = sum(severity_weight.get(c.get("severity", "MEDIUM"), 2.0) for c in failed)
+
+    component = (failed_weight / total_weight * 100.0) if total_weight > 0 else 0.0
     return component, flags
 
 
