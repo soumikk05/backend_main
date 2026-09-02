@@ -35,6 +35,10 @@ from app.services.liveness_service import check_liveness
 from app.services.registry_service import screen_registry, register_face_embedding, detect_identity_cluster
 from app.services.risk_engine import compute_risk_score
 from app.services.audit_service import append_audit, save_metrics
+from app.services.cross_document_service import (
+    resolve_candidate_identity_and_document,
+    compare_cross_document_consistency,
+)
 from app.services.evidence_service import evidence_urls
 from app.services.privacy_service import encrypt_value, lookup_hash, mask_identifier, mask_name
 from app.utils.image_utils import compute_image_sha256, save_upload_to_temp, cleanup_temp_file
@@ -101,17 +105,48 @@ def assess(
 
         # 5. Face Verification (optional)
         face_result = None
+        face_vec = None
         if selfie_temp_path is not None:
             face_result = verify_faces(processing_path, selfie_temp_path)
             face_result["liveness"] = check_liveness(selfie_temp_path)
             embedding = face_embedding(selfie_temp_path)
             if not embedding["error"]:
-                person_id = str(doc_number or holder_name or image_hash)
-                register_face_embedding(person_id, embedding["embedding"], embedding["hash"], db)
-                face_result["identity_cluster"] = detect_identity_cluster(person_id, doc_number, holder_name, embedding["embedding"], db)
+                face_vec = embedding["embedding"]
+                person_id_key = str(doc_number or holder_name or image_hash)
+                register_face_embedding(person_id_key, embedding["embedding"], embedding["hash"], db)
+                face_result["identity_cluster"] = detect_identity_cluster(person_id_key, doc_number, holder_name, embedding["embedding"], db)
         timings["face"] = round((perf_counter() - started) * 1000 - sum(timings.values()), 2)
 
-        # 6. Duplicate Identity & Blacklist Registry Check
+        # 6. Candidate Identity & Document Resolution (Persistence Preparation)
+        classified_type = classification.get("document_type", doc_type)
+        person, persistent_doc, is_repeat = resolve_candidate_identity_and_document(
+            db=db,
+            document_type=classified_type,
+            document_number=doc_number,
+            holder_name=holder_name,
+            date_of_birth=date_of_birth,
+            nationality=doc_fields.get("nationality", {}).get("value") if isinstance(doc_fields.get("nationality"), dict) else doc_fields.get("nationality"),
+            gender=doc_fields.get("sex", {}).get("value") or doc_fields.get("gender", {}).get("value") if isinstance(doc_fields.get("sex") or doc_fields.get("gender"), dict) else (doc_fields.get("sex") or doc_fields.get("gender")),
+            image_hash=image_hash,
+            evidence_path=None,
+            face_vector=face_vec,
+        )
+
+        # 7. Cross-Document Consistency Checking (against trusted/verified records)
+        comparisons_data, cross_doc_points, cross_doc_flags = compare_cross_document_consistency(
+            db=db,
+            person=person,
+            current_document=persistent_doc,
+            current_extracted_fields=doc_fields,
+        )
+        cross_doc_summary = {
+            "comparisons": comparisons_data,
+            "risk_points": cross_doc_points,
+            "flags": cross_doc_flags,
+            "compared_records_count": len(comparisons_data),
+        }
+
+        # 8. Duplicate Identity & Blacklist Registry Check
         registry_result = screen_registry(
             document_number=doc_number,
             holder_name=holder_name,
@@ -121,7 +156,7 @@ def assess(
         )
         timings["registry"] = round((perf_counter() - started) * 1000 - sum(timings.values()), 2)
 
-        # 7. Consolidated Risk Calculation
+        # 9. Consolidated Risk Calculation (incorporating cross-document evidence)
         risk_result = compute_risk_score(
             validation_result=validation_result,
             tampering_result=tampering_result,
@@ -131,14 +166,17 @@ def assess(
             metadata_result=next((check for check in tampering_result.get("checks", []) if check.get("name") == "exif_metadata"), None),
             liveness_result=face_result.get("liveness") if face_result else None,
             ocr_result=ocr_result,
+            cross_document_result=cross_doc_summary,
         )
         timings["risk"] = round((perf_counter() - started) * 1000 - sum(timings.values()), 2)
 
-        # 8. Digital Audit Trail Persistence (defensive — never fails the scan request)
+        # 10. Digital Audit Trail Persistence & Atomic Commit
         record_id = None
         try:
             record = ScreeningRecord(
-            document_type=classification.get("document_type", doc_type),
+                document_id=persistent_doc.id,
+                person_id=person.id,
+                document_type=classified_type,
                 document_number=mask_identifier(doc_number),
                 holder_name=mask_name(holder_name),
                 date_of_birth=date_of_birth,
@@ -158,15 +196,42 @@ def assess(
             )
             db.add(record)
             db.flush()
+
+            # Store evidence artifacts on disk and record relative path
             heatmap_path = (tampering_result.get("heatmap") or {}).get("ela_heatmap_path")
-            risk_result["evidence_artifacts"] = evidence_urls(doc_temp_path, corrected_path, heatmap_path, record.id)
+            ev_urls = evidence_urls(doc_temp_path, corrected_path, heatmap_path, record.id)
+            record.evidence_file_path = ev_urls.get("original_image")
+            if not persistent_doc.evidence_file_path:
+                persistent_doc.evidence_file_path = ev_urls.get("original_image")
+            risk_result["evidence_artifacts"] = ev_urls
+
+            # Stage CrossDocumentComparison records
+            for comp in comparisons_data:
+                db.add(CrossDocumentComparison(
+                    screening_id=record.id,
+                    person_id=comp.get("person_id"),
+                    current_document_id=comp["current_document_id"],
+                    trusted_document_id=comp["trusted_document_id"],
+                    field_name=comp["field_name"],
+                    current_value=comp.get("current_value"),
+                    trusted_value=comp.get("trusted_value"),
+                    current_confidence=comp.get("current_confidence"),
+                    trusted_confidence=comp.get("trusted_confidence"),
+                    is_match=comp["is_match"],
+                    severity=comp["severity"],
+                    reason=comp.get("reason"),
+                    risk_points_assigned=comp["risk_points_assigned"],
+                ))
+
             timings["total"] = round((perf_counter() - started) * 1000, 2)
             append_audit(
                 db, record.id, None, image_hash, risk_result,
                 risk_result.get("modules", {}), timings["total"],
-                document_type=classification.get("document_type"),
+                document_type=classified_type,
             )
             save_metrics(db, record.id, timings)
+
+            # Atomic commit of all staged changes
             db.commit()
             db.refresh(record)
             record_id = record.id
@@ -176,7 +241,9 @@ def assess(
                 json.dumps({
                     "event": "SCREENING_COMPLETED",
                     "record_id": record_id,
-                    "document_type": doc_type,
+                    "document_id": persistent_doc.id,
+                    "person_id": person.id,
+                    "document_type": classified_type,
                     "document_number_masked": mask_identifier(doc_number),
                     "risk_score": risk_result["risk_score"],
                     "risk_label": risk_result["risk_label"],

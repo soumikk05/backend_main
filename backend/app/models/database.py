@@ -4,9 +4,87 @@ SQLAlchemy ORM models for digital audit trails and identity blacklist registries
 
 import uuid
 from datetime import datetime
-from sqlalchemy import Column, String, Float, DateTime, JSON, Text, Integer, SmallInteger
+from sqlalchemy import Column, String, Float, DateTime, JSON, Text, Integer, SmallInteger, Boolean, ForeignKey
+from sqlalchemy.orm import relationship
 
 from app.db import Base
+
+
+class Person(Base):
+    """
+    Canonical person / identity entity.
+    Groups multiple documents and face embeddings under one resolved individual.
+    """
+    __tablename__ = "persons"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    primary_name = Column(String(200), nullable=True, index=True)
+    primary_name_hash = Column(String(64), nullable=True, index=True)
+    date_of_birth = Column(String(20), nullable=True, index=True)
+    nationality = Column(String(50), nullable=True)
+    gender = Column(String(10), nullable=True)
+    verification_status = Column(String(20), nullable=False, default="UNVERIFIED", index=True)
+    notes = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    documents = relationship("Document", back_populates="person")
+    screenings = relationship("ScreeningRecord", back_populates="person")
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "primary_name": self.primary_name,
+            "date_of_birth": self.date_of_birth,
+            "nationality": self.nationality,
+            "gender": self.gender,
+            "verification_status": self.verification_status,
+            "notes": self.notes,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+        }
+
+
+class Document(Base):
+    """
+    Persistent document entity representing a physical or digital identity document.
+    Enables repeat screenings of the same document and cross-document validation.
+    """
+    __tablename__ = "documents"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    person_id = Column(String(36), ForeignKey("persons.id"), nullable=True, index=True)
+    document_type = Column(String(50), nullable=False, index=True)
+    document_number = Column(String(100), nullable=True, index=True)
+    document_number_encrypted = Column(Text, nullable=True)
+    document_number_hash = Column(String(64), nullable=True, index=True)
+    issuing_country = Column(String(50), nullable=True)
+    issue_date = Column(String(20), nullable=True)
+    expiry_date = Column(String(20), nullable=True)
+    verification_status = Column(String(20), nullable=False, default="UNVERIFIED", index=True)
+    primary_image_hash = Column(String(64), nullable=True, index=True)
+    evidence_file_path = Column(String(500), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    person = relationship("Person", back_populates="documents")
+    screenings = relationship("ScreeningRecord", back_populates="document")
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "person_id": self.person_id,
+            "document_type": self.document_type,
+            "document_number": self.document_number,
+            "issuing_country": self.issuing_country,
+            "issue_date": self.issue_date,
+            "expiry_date": self.expiry_date,
+            "verification_status": self.verification_status,
+            "primary_image_hash": self.primary_image_hash,
+            "evidence_file_path": self.evidence_file_path,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+        }
 
 
 class ScreeningRecord(Base):
@@ -17,6 +95,10 @@ class ScreeningRecord(Base):
     __tablename__ = "screening_records"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    document_id = Column(String(36), ForeignKey("documents.id"), nullable=True, index=True)
+    person_id = Column(String(36), ForeignKey("persons.id"), nullable=True, index=True)
+    evidence_file_path = Column(String(500), nullable=True)
+
     document_type = Column(String(50), nullable=True, default="UNKNOWN")
     document_number = Column(String(100), nullable=True, index=True)
     holder_name = Column(String(200), nullable=True, index=True)
@@ -39,9 +121,16 @@ class ScreeningRecord(Base):
 
     created_at = Column(DateTime, default=datetime.utcnow, index=True)
 
+    document = relationship("Document", back_populates="screenings")
+    person = relationship("Person", back_populates="screenings")
+    cross_comparisons = relationship("CrossDocumentComparison", back_populates="screening")
+
     def to_dict(self):
         return {
             "id": self.id,
+            "document_id": self.document_id,
+            "person_id": self.person_id,
+            "evidence_file_path": self.evidence_file_path,
             "document_type": self.document_type,
             "document_number": self.document_number,
             "holder_name": self.holder_name,
@@ -55,6 +144,52 @@ class ScreeningRecord(Base):
             "risk_score": self.risk_score,
             "risk_label": self.risk_label,
             "flags": self.flags or [],
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+        }
+
+
+class CrossDocumentComparison(Base):
+    """
+    Stores field-level comparison results between the current document and trusted historical records.
+    Provides structured explainable evidence for cross-document consistency checks.
+    """
+    __tablename__ = "cross_document_comparisons"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    screening_id = Column(String(36), ForeignKey("screening_records.id"), nullable=False, index=True)
+    person_id = Column(String(36), ForeignKey("persons.id"), nullable=True, index=True)
+    current_document_id = Column(String(36), ForeignKey("documents.id"), nullable=False, index=True)
+    trusted_document_id = Column(String(36), ForeignKey("documents.id"), nullable=False, index=True)
+
+    field_name = Column(String(50), nullable=False, index=True)
+    current_value = Column(String(255), nullable=True)
+    trusted_value = Column(String(255), nullable=True)
+    current_confidence = Column(Float, nullable=True)
+    trusted_confidence = Column(Float, nullable=True)
+    is_match = Column(Boolean, nullable=False, index=True)
+    severity = Column(String(20), nullable=False, default="MEDIUM")
+    reason = Column(String(255), nullable=True)
+    risk_points_assigned = Column(Float, nullable=False, default=0.0)
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+
+    screening = relationship("ScreeningRecord", back_populates="cross_comparisons")
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "screening_id": self.screening_id,
+            "person_id": self.person_id,
+            "current_document_id": self.current_document_id,
+            "trusted_document_id": self.trusted_document_id,
+            "field_name": self.field_name,
+            "current_value": self.current_value,
+            "trusted_value": self.trusted_value,
+            "current_confidence": self.current_confidence,
+            "trusted_confidence": self.trusted_confidence,
+            "is_match": self.is_match,
+            "severity": self.severity,
+            "reason": self.reason,
+            "risk_points_assigned": self.risk_points_assigned,
             "created_at": self.created_at.isoformat() if self.created_at else None,
         }
 

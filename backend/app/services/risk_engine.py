@@ -44,6 +44,7 @@ def compute_risk_score(
     metadata_result: Optional[Dict[str, Any]] = None,
     liveness_result: Optional[Dict[str, Any]] = None,
     ocr_result: Optional[Dict[str, Any]] = None,
+    cross_document_result: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """
     Main entry point for Risk Engine V2.
@@ -103,6 +104,13 @@ def compute_risk_score(
     all_reasons.extend(forensic_flags)
     all_reasons.extend(quality_flags)
 
+    # Cross-document consistency contribution
+    cross_doc_points = 0.0
+    if cross_document_result:
+        cross_doc_points = float(cross_document_result.get("risk_points", 0.0))
+        cross_flags = cross_document_result.get("flags", [])
+        all_reasons.extend(cross_flags)
+
     # Weighted Base Score
     base_risk_score = (
         validation_component * RISK_WEIGHT_VALIDATION
@@ -111,7 +119,7 @@ def compute_risk_score(
         + registry_component * RISK_WEIGHT_REGISTRY
     )
 
-    # Supplemental intake contributions (including identity cluster)
+    # Supplemental intake contributions (including identity cluster & cross-document consistency)
     raw_risk_score = min(
         100.0,
         base_risk_score
@@ -119,6 +127,7 @@ def compute_risk_score(
         + liveness_component * 0.10
         + ocr_component * 0.07
         + cluster_component  # identity cluster adds directly (already scaled to points)
+        + cross_doc_points   # cross-document evidence adds configurable points
     )
 
     # Hard security overrides:
@@ -147,6 +156,7 @@ def compute_risk_score(
         "face": round(face_component, 2),
         "registry": round(registry_component, 2),
         "identity_cluster": round(cluster_component, 2),
+        "cross_document_consistency": round(cross_doc_points, 2),
         "quality": round(quality_component, 2),
         "liveness": round(liveness_component, 2),
         "ocr_confidence": round(ocr_component, 2),
@@ -157,6 +167,7 @@ def compute_risk_score(
         "tampering": tampering_result,
         "face": face_result,
         "registry": registry_result,
+        "cross_document": cross_document_result,
         "quality": quality_result,
         "metadata": metadata_result,
         "liveness": liveness_result,
