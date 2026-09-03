@@ -20,7 +20,7 @@ import numpy as np
 logger = logging.getLogger(__name__)
 
 DEEPFACE_MODEL_NAME = "VGG-Face"
-DEEPFACE_DETECTOR_BACKEND = "opencv"
+DEEPFACE_DETECTOR_BACKEND = "mtcnn"
 
 
 def _detect_faces_count(image_path: str) -> int:

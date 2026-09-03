@@ -29,10 +29,24 @@ logger = logging.getLogger(__name__)
 _easyocr_reader = None
 
 _DATE_PATTERN = re.compile(
-    r"\b(\d{1,2}[\/\-. ](?:\d{1,2}|[A-Za-z]{3})[\/\-. ]\d{2,4})\b"
+    r"\b(\d{1,2}[\/\-. ](?:\d{1,2}|[A-Za-z]{3})[\/\-. ]\d{2,4}|\d{4}[\/\-. ]\d{1,2}[\/\-. ]\d{1,2})\b"
 )
 _DOC_NUMBER_PATTERN = re.compile(r"\b[A-Z0-9]{6,12}\b")
 _GENDER_PATTERN = re.compile(r"\b(M|F|MALE|FEMALE|X)\b", re.IGNORECASE)
+
+_DOB_LABELS = [
+    "dob", "date of birth", "birth date", "birth", "d.o.b", "d.o.b.", "born",
+    "date de naissance", "fecha de nacimiento", "geburtstag",
+]
+_EXPIRY_LABELS = [
+    "expiry", "expiry date", "expiration date", "valid until", "valid till",
+    "expires", "valid upto", "valid to", "exp date", "exp", "val",
+    "date of expiry", "expiration", "validity", "date d'expiration",
+]
+_ISSUE_LABELS = [
+    "issue", "date of issue", "issue date", "issued", "issuing date",
+    "doi", "d.o.i", "d.o.i.", "issued on", "date de delivrance",
+]
 
 _TYPE_KEYWORDS = {
     "visa": ["visa", "entry permit", "multiple entry", "single entry"],
@@ -48,6 +62,31 @@ def _get_easyocr_reader():
         import easyocr
         _easyocr_reader = easyocr.Reader(EASYOCR_LANGS, gpu=False)
     return _easyocr_reader
+
+
+def _find_date_near_label(
+    lines: List[str],
+    labels: List[str],
+    fallback: str = "",
+    max_lookahead: int = 2,
+) -> str:
+    """
+    Search lines for one of the target label keywords, then extract the first date
+    found either on the same line or in the immediate subsequent lines.
+    Falls back to `fallback` if no date is found near any matching label.
+    """
+    for i, line in enumerate(lines):
+        line_lower = line.lower()
+        if any(lbl in line_lower for lbl in labels):
+            same_line_dates = _DATE_PATTERN.findall(line)
+            if same_line_dates:
+                return same_line_dates[0]
+            for offset in range(1, max_lookahead + 1):
+                if i + offset < len(lines):
+                    next_line_dates = _DATE_PATTERN.findall(lines[i + offset])
+                    if next_line_dates:
+                        return next_line_dates[0]
+    return fallback
 
 
 def read_document_text(image_path: str) -> str:
@@ -181,58 +220,68 @@ def _extract_via_easyocr(image_path: str, expected_type: Optional[str] = None) -
         "raw_text_lines": lines,
     }
 
-    # Document-specific mapping
+    # Document-specific mapping with label proximity date extraction
     if detected_type == "passport":
+        dob_val = _find_date_near_label(lines, _DOB_LABELS, dates_found[0] if dates_found else "")
+        expiry_val = _find_date_near_label(lines, _EXPIRY_LABELS, dates_found[1] if len(dates_found) > 1 else "")
         fields.update({
             "passport_number": doc_num,
             "name": probable_name,
             "nationality": "IND" if "india" in lowered else ("USA" if "usa" in lowered else ""),
-            "dob": dates_found[0] if dates_found else "",
-            "date_of_birth": dates_found[0] if dates_found else "",
-            "expiry": dates_found[1] if len(dates_found) > 1 else "",
-            "expiration_date": dates_found[1] if len(dates_found) > 1 else "",
+            "dob": dob_val,
+            "date_of_birth": dob_val,
+            "expiry": expiry_val,
+            "expiration_date": expiry_val,
             "gender": gender_val,
             "mrz": "",
         })
     elif detected_type == "visa":
+        issue_val = _find_date_near_label(lines, _ISSUE_LABELS, dates_found[0] if dates_found else "")
+        expiry_val = _find_date_near_label(lines, _EXPIRY_LABELS, dates_found[1] if len(dates_found) > 1 else "")
         fields.update({
             "visa_number": doc_num,
             "name": probable_name,
             "visa_type": "Tourist" if "tourist" in lowered else ("Business" if "business" in lowered else "Standard"),
-            "issue_date": dates_found[0] if dates_found else "",
-            "expiry_date": dates_found[1] if len(dates_found) > 1 else "",
-            "expiration_date": dates_found[1] if len(dates_found) > 1 else "",
+            "issue_date": issue_val,
+            "expiry_date": expiry_val,
+            "expiration_date": expiry_val,
             "entry_type": "Multiple" if "multiple" in lowered else "Single",
             "stay_duration": "90 days" if "90" in lowered else "30 days",
         })
     elif detected_type == "national_id":
+        dob_val = _find_date_near_label(lines, _DOB_LABELS, dates_found[0] if dates_found else "")
         fields.update({
             "id_number": doc_num,
             "name": probable_name,
-            "dob": dates_found[0] if dates_found else "",
-            "date_of_birth": dates_found[0] if dates_found else "",
+            "dob": dob_val,
+            "date_of_birth": dob_val,
             "gender": gender_val,
             "address": " ".join([ln for ln in lines if any(w in ln.lower() for w in ("road", "street", "dist", "nagar", "pin", "po"))]),
         })
     elif detected_type == "driving_license":
+        issue_val = _find_date_near_label(lines, _ISSUE_LABELS, dates_found[0] if dates_found else "")
+        expiry_val = _find_date_near_label(lines, _EXPIRY_LABELS, dates_found[1] if len(dates_found) > 1 else "")
+        dob_val = _find_date_near_label(lines, _DOB_LABELS, dates_found[2] if len(dates_found) > 2 else "")
         fields.update({
             "license_number": doc_num,
             "name": probable_name,
-            "issue_date": dates_found[0] if dates_found else "",
-            "expiry_date": dates_found[1] if len(dates_found) > 1 else "",
-            "expiration_date": dates_found[1] if len(dates_found) > 1 else "",
-            "dob": dates_found[2] if len(dates_found) > 2 else "",
-            "date_of_birth": dates_found[2] if len(dates_found) > 2 else "",
+            "issue_date": issue_val,
+            "expiry_date": expiry_val,
+            "expiration_date": expiry_val,
+            "dob": dob_val,
+            "date_of_birth": dob_val,
             "vehicle_class": "LMV" if "lmv" in lowered else ("MCWG" if "mcwg" in lowered else "Class C"),
         })
     elif detected_type == "permit":
+        issue_val = _find_date_near_label(lines, _ISSUE_LABELS, dates_found[0] if dates_found else "")
+        expiry_val = _find_date_near_label(lines, _EXPIRY_LABELS, dates_found[1] if len(dates_found) > 1 else "")
         fields.update({
             "permit_number": doc_num,
             "name": probable_name,
             "permit_type": "Work" if "work" in lowered else "Residence",
-            "issue_date": dates_found[0] if dates_found else "",
-            "expiry_date": dates_found[1] if len(dates_found) > 1 else "",
-            "expiration_date": dates_found[1] if len(dates_found) > 1 else "",
+            "issue_date": issue_val,
+            "expiry_date": expiry_val,
+            "expiration_date": expiry_val,
         })
 
     avg_conf = sum(c for _, _, c in results) / len(results) if results else 0.0

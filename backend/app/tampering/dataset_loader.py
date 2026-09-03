@@ -4,7 +4,7 @@ from pathlib import Path
 from random import Random
 from typing import Dict, List, Tuple
 
-CLASS_FOLDERS = ("genuine/passport", "genuine/visa", "genuine/national_id", "genuine/driving_license", "tampered/photo_swap", "tampered/text_edit", "tampered/dob_edit", "tampered/name_edit", "tampered/number_edit", "tampered/stamp_forgery", "tampered/copy_move")
+CLASS_FOLDERS = ("genuine/passport", "genuine/visa", "genuine/national_id", "genuine/driving_license", "tampered/photo_swap", "tampered/text_edit", "tampered/dob_edit", "tampered/name_edit", "tampered/number_edit", "tampered/stamp_forgery", "tampered/copy_move", "tampered/external_passport", "tampered/external_license")
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp", ".tif", ".tiff"}
 
 def load_tampering_dataset(root: str, seed: int = 42) -> Dict[str, List[Tuple[str, int]]]:
