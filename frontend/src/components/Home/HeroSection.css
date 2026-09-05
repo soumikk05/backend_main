@@ -1,0 +1,280 @@
+/* ==========================================================================
+   National Portal Hero Section & Kalam Quote Card Styles
+   Exact visual match for national identity screening portal.
+   ========================================================================== */
+
+.gov-hero-wrapper {
+  width: 100%;
+  position: relative;
+  margin-bottom: 2rem;
+}
+
+/* 1. Backdrop with Twilight India Gate Photo - Full Upper Architecture */
+.gov-hero {
+  position: relative;
+  background-image: url('/india_gate.jpg');
+  background-position: center 12%;
+  background-size: cover;
+  background-repeat: no-repeat;
+  color: #FFFFFF;
+  padding: 2.25rem 0 4.75rem 0;
+  overflow: visible;
+  text-align: center;
+}
+
+.gov-hero__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(6, 17, 36, 0.65) 0%,
+    rgba(9, 23, 48, 0.40) 40%,
+    rgba(5, 14, 30, 0.85) 100%
+  );
+  pointer-events: none;
+}
+
+.gov-hero__content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.gov-hero__emblem-wrap {
+  margin-bottom: 0.85rem;
+  display: flex;
+  justify-content: center;
+  filter: drop-shadow(0 2px 12px rgba(0, 0, 0, 0.6));
+}
+
+.gov-hero__branding {
+  margin-bottom: 1.5rem;
+}
+
+.gov-hero__title {
+  font-size: 1.65rem;
+  font-weight: 800;
+  line-height: 1.3;
+  color: #FFFFFF;
+  margin: 0;
+  letter-spacing: -0.01em;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.85);
+}
+
+.gov-hero__slogan {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #F8FAFC;
+  margin-top: 0.45rem;
+  letter-spacing: 0.015em;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.85);
+}
+
+.gov-hero__slogan-gold {
+  color: #E5A93C;
+  font-weight: 700;
+}
+
+/* Rounded Pill Search Bar */
+.gov-hero__search-form {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 640px;
+  background: #FFFFFF;
+  border-radius: 9999px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
+  padding: 4px 6px 4px 22px;
+  gap: 8px;
+  margin: 0.5rem auto 0 auto;
+}
+
+.gov-hero__search-input {
+  width: 100%;
+  border: none;
+  outline: none;
+  font-size: 0.9375rem;
+  color: #0F172A;
+  background: transparent;
+  padding: 0.55rem 0;
+  font-family: inherit;
+}
+
+.gov-hero__search-input::placeholder {
+  color: #94A3B8;
+}
+
+.gov-hero__search-btn {
+  background: #0B1B36;
+  color: #FFFFFF;
+  border: none;
+  padding: 0.65rem 1.85rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
+  white-space: nowrap;
+}
+
+.gov-hero__search-btn:hover {
+  background: #1B365D;
+}
+
+/* 2. Dr. A.P.J. Abdul Kalam Speech Card */
+.gov-quote-container {
+  position: relative;
+  z-index: 10;
+  margin-top: 1.75rem;
+  display: flex;
+  justify-content: center;
+}
+
+.gov-quote-card {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 10px 25px rgba(11, 30, 54, 0.09);
+  border-radius: 12px;
+  padding: 1.15rem 1.75rem;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  max-width: 720px;
+  width: 100%;
+  position: relative;
+}
+
+/* Speech bubble pointer */
+.gov-quote-card::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 48px;
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 10px solid #FFFFFF;
+  filter: drop-shadow(0 2px 2px rgba(11, 30, 54, 0.05));
+}
+
+.gov-quote-card__avatar-wrap {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid #E2E8F0;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+  flex-shrink: 0;
+  background-color: #0B1E36;
+}
+
+.gov-quote-card__avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.gov-quote-card__content {
+  flex: 1;
+}
+
+.gov-quote-card__quote {
+  margin: 0 0 0.35rem 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.45;
+  color: #1E293B;
+}
+
+.gov-quote-card__author {
+  display: flex;
+  align-items: center;
+  font-size: 0.8125rem;
+}
+
+.gov-quote-card__name {
+  color: #475569;
+  font-weight: 500;
+}
+
+/* 3. Official Portal Statistics Bar (Exact match to reference photo) */
+.gov-stats-bar {
+  background: #FFFFFF;
+  border-bottom: 1px solid #E2E8F0;
+  border-top: 1px solid #E2E8F0;
+  padding: 1.75rem 0;
+  margin-top: 2rem;
+  width: 100%;
+}
+
+.gov-stats-bar__inner {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.gov-stats-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 0.25rem 0.5rem;
+}
+
+.gov-stats-card__value {
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1.1;
+  color: #0B1E36;
+  font-family: var(--font-body, inherit);
+  letter-spacing: -0.03em;
+  margin-bottom: 0.25rem;
+}
+
+.gov-stats-card__label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #334155;
+  line-height: 1.35;
+  margin-top: 0.2rem;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .gov-stats-bar__inner {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .gov-hero {
+    padding: 1.5rem 0 3.5rem 0;
+  }
+  .gov-hero__title-hi {
+    font-size: 1.2rem;
+  }
+  .gov-hero__title-en {
+    font-size: 0.875rem;
+  }
+  .gov-stats-bar__inner {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .gov-quote-card {
+    flex-direction: column;
+    text-align: center;
+  }
+  .gov-quote-card::after {
+    display: none;
+  }
+}

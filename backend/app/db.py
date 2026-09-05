@@ -67,3 +67,9 @@ def init_db():
             }.items():
                 if name not in screening_columns:
                     connection.execute(text(f"ALTER TABLE screening_records ADD COLUMN {name} {definition}"))
+
+            # Migration for users
+            user_columns = {row[1] for row in connection.execute(text("PRAGMA table_info(users)"))}
+            for name, definition in {"last_login_at": "DATETIME", "badge_number": "VARCHAR(50)", "full_name": "VARCHAR(200)"}.items():
+                if name not in user_columns:
+                    connection.execute(text(f"ALTER TABLE users ADD COLUMN {name} {definition}"))

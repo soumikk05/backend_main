@@ -58,11 +58,22 @@ class TamperingResponse(BaseModel):
 
 
 class CNNScoreResponse(BaseModel):
+    model_config = {"protected_namespaces": ()}
+
     cnn_score: float
     model: str
     triggered: bool
     detail: str
     error: Optional[str] = None
+    tamper_probability: Optional[float] = None
+    global_probability: Optional[float] = None
+    local_peak_probability: Optional[float] = None
+    local_mean_probability: Optional[float] = None
+    patch_probabilities: Optional[List[float]] = None
+    uncertain: Optional[bool] = None
+    mode: Optional[str] = None
+    model_version: Optional[str] = None
+    device: Optional[str] = None
 
 
 # --- Face Verification Models ---

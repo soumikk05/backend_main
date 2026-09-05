@@ -221,7 +221,7 @@ def run_epoch(model, dataloader, device, optimizer=None, criterion=None) -> Tupl
     return running_loss / max(total, 1), (correct / max(total, 1)) * 100
 
 
-def train_forgery_model(data_root: str = "dataset", epochs: int = 15, batch_size: int = 16, lr: float = 1e-4):
+def train_forgery_model(data_root: str = "dataset", epochs: int = 15, batch_size: int = 16, lr: float = 1e-4, max_samples: int = 0, device_str: str = "auto"):
     print("Initializing MobileNetV2 for document forgery classification...")
     os.makedirs(WEIGHTS_DIR, exist_ok=True)
 
@@ -230,6 +230,12 @@ def train_forgery_model(data_root: str = "dataset", epochs: int = 15, batch_size
     tampered_train = [p for p, lbl in splits["train"] if lbl == 1]
     genuine_val = [p for p, lbl in splits["validation"] if lbl == 0]
     tampered_val = [p for p, lbl in splits["validation"] if lbl == 1]
+
+    if max_samples > 0:
+        genuine_train = genuine_train[:max_samples]
+        tampered_train = tampered_train[:max_samples]
+        genuine_val = genuine_val[:max(1, max_samples // 4)]
+        tampered_val = tampered_val[:max(1, max_samples // 4)]
 
     total_genuine = len(genuine_train) + len(genuine_val)
     if total_genuine < MIN_GENUINE_IMAGES:
@@ -274,7 +280,16 @@ def train_forgery_model(data_root: str = "dataset", epochs: int = 15, batch_size
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False) if len(val_dataset) > 0 else None
 
     model = build_model()
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cpu")
+    if device_str == "cuda":
+        device = torch.device("cuda")
+    elif device_str == "auto" and torch.cuda.is_available():
+        try:
+            test_conv = nn.Conv2d(1, 1, 1).cuda()
+            _ = test_conv(torch.randn(1, 1, 4, 4, device="cuda"))
+            device = torch.device("cuda")
+        except Exception:
+            device = torch.device("cpu")
     model.to(device)
 
     criterion = nn.BCELoss()
@@ -303,5 +318,7 @@ if __name__ == "__main__":
     parser.add_argument("--data_root", type=str, default="dataset", help="Root folder containing genuine/ and tampered/ subfolders")
     parser.add_argument("--epochs", type=int, default=15, help="Number of training epochs")
     parser.add_argument("--batch_size", type=int, default=16, help="Batch size")
+    parser.add_argument("--max_samples", type=int, default=0, help="Max train samples per class (0 for all)")
+    parser.add_argument("--device", type=str, default="auto", help="Device ('cpu', 'cuda', 'auto')")
     args = parser.parse_args()
-    train_forgery_model(data_root=args.data_root, epochs=args.epochs, batch_size=args.batch_size)
+    train_forgery_model(data_root=args.data_root, epochs=args.epochs, batch_size=args.batch_size, max_samples=args.max_samples, device_str=args.device)

@@ -16,7 +16,7 @@ from typing import Any, Dict, List, Optional
 from app.validation.validators import validate_country_document
 
 _ALPHA3_PATTERN = re.compile(r"^[A-Z]{3}$")
-_DOC_NUMBER_PATTERN = re.compile(r"^[A-Z0-9]{6,12}$")
+_DOC_NUMBER_PATTERN = re.compile(r"^[A-Z0-9\s\-]{6,19}$")
 
 MIN_PLAUSIBLE_AGE = 0
 MAX_PLAUSIBLE_AGE = 120
@@ -168,7 +168,8 @@ def _validate_mrz_backed_document(fields: Dict[str, Any], confidence: Dict[str, 
 def _validate_fallback_document(fields: Dict[str, Any]) -> List[Dict[str, Any]]:
     checks = []
     doc_num = str(fields.get("document_number") or fields.get("id_number") or fields.get("license_number") or fields.get("visa_number") or fields.get("permit_number") or "").upper()
-    doc_num_ok = bool(_DOC_NUMBER_PATTERN.match(doc_num)) if doc_num else False
+    clean_doc = re.sub(r"[\s\-]", "", doc_num)
+    doc_num_ok = bool(_DOC_NUMBER_PATTERN.match(doc_num)) and (6 <= len(clean_doc) <= 18) if doc_num else False
     checks.append(_check(
         rule="document_number_format",
         field="document_number",

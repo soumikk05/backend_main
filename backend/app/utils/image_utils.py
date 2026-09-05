@@ -91,6 +91,17 @@ def _validate_image_readable(file_path: str) -> None:
                     "The file may be corrupt, truncated, or in an unsupported sub-format."
                 ),
             )
+        h, w = img.shape[:2]
+        if h > 10000 or w > 10000 or (h * w) > 50_000_000:
+            raise HTTPException(
+                status_code=415,
+                detail=f"Image dimensions ({w}x{h}) exceed maximum allowable limits (decompression bomb protection).",
+            )
+        if h < 20 or w < 20:
+            raise HTTPException(
+                status_code=415,
+                detail=f"Image dimensions ({w}x{h}) are too small to be a valid document.",
+            )
 
 
 def compute_image_sha256(file_path: str) -> str:

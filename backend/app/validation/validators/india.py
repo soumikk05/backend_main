@@ -8,7 +8,7 @@ from app.validation.validators.base import BaseCountryValidator
 # PAN: 5 uppercase letters, 4 digits, 1 uppercase letter
 PASSPORT_REGEX = re.compile(r"^[A-Z][0-9]{7}$")
 VISA_REGEX = re.compile(r"^[A-Z0-9]{6,12}$")
-AADHAAR_REGEX = re.compile(r"^(\d{12}|\*{8}\d{4})$")
+AADHAAR_REGEX = re.compile(r"^(\d{12}|\d{4}\s\d{4}\s\d{4}|\*{8}\d{4}|[Xx*]{4}\s[Xx*]{4}\s\d{4})$")
 DRIVING_LICENSE_REGEX = re.compile(r"^[A-Z]{2}[0-9]{2}[0-9]{11}$")
 
 
@@ -44,7 +44,8 @@ class IndiaValidator(BaseCountryValidator):
                 "message": "Valid Indian Visa format" if valid else f"Invalid Indian Visa format: '{clean}'",
             }
         elif doc_type == "national_id":
-            valid = bool(AADHAAR_REGEX.fullmatch(clean)) or len(clean) >= 8
+            clean_no_space = clean.replace(" ", "")
+            valid = bool(AADHAAR_REGEX.fullmatch(clean)) or bool(AADHAAR_REGEX.fullmatch(clean_no_space)) or len(clean_no_space) >= 8
             return {
                 "valid": valid,
                 "status": "VALID" if valid else "INVALID",

@@ -1,0 +1,35 @@
+/* Screening Modular Workspace Layout */
+.screening-workspace {
+  width: 100%;
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+}
+
+.screening-workspace__container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+@media (min-width: 1024px) {
+  .screening-workspace__container {
+    flex-direction: row;
+  }
+}
+
+.screening-workspace__viewport {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  background: var(--surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: var(--shadow-sm, 0 4px 20px rgba(0, 0, 0, 0.05));
+}
+
+.screening-workspace__module-wrapper {
+  width: 100%;
+}

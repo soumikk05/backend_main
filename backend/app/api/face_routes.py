@@ -98,16 +98,23 @@ def verify_liveness_burst(
 
 @router.post("/verify", response_model=FaceVerifyResponse)
 def verify(
-    document_photo: UploadFile = File(..., description="Photo extracted/cropped from the ID document"),
-    selfie_photo: UploadFile = File(..., description="Live selfie photo to compare against"),
+    document_photo: Optional[UploadFile] = File(None, description="Photo extracted/cropped from the ID document"),
+    document_image: Optional[UploadFile] = File(None, description="Document image"),
+    selfie_photo: Optional[UploadFile] = File(None, description="Live selfie photo to compare against"),
+    selfie_image: Optional[UploadFile] = File(None, description="Live selfie image"),
 ):
     """
     Compares a document photo against a live selfie using DeepFace (VGG-Face).
     Runs synchronously in a worker threadpool to avoid blocking event loops during neural inference.
     Returns match=None with an error message (not a 500) if faces cannot be detected.
     """
-    doc_temp_path = save_upload_to_temp(document_photo)
-    selfie_temp_path = save_upload_to_temp(selfie_photo)
+    doc_file = document_photo or document_image
+    selfie_file = selfie_photo or selfie_image
+    if not doc_file or not selfie_file:
+        raise HTTPException(status_code=422, detail="Both document image and selfie image are required")
+
+    doc_temp_path = save_upload_to_temp(doc_file)
+    selfie_temp_path = save_upload_to_temp(selfie_file)
     try:
         result = verify_faces(doc_temp_path, selfie_temp_path)
         return result
@@ -117,8 +124,17 @@ def verify(
 
 
 @router.post("/liveness")
-def liveness(selfie_photo: UploadFile = File(...), challenge: str | None = None):
-    path = save_upload_to_temp(selfie_photo)
-    try: return check_liveness(path, challenge)
-    finally: cleanup_temp_file(path)
+def liveness(
+    selfie_photo: Optional[UploadFile] = File(None),
+    file: Optional[UploadFile] = File(None),
+    challenge: str | None = None
+):
+    target = selfie_photo or file
+    if not target:
+        raise HTTPException(status_code=422, detail="Selfie image file is required")
+    path = save_upload_to_temp(target)
+    try:
+        return check_liveness(path, challenge)
+    finally:
+        cleanup_temp_file(path)
 

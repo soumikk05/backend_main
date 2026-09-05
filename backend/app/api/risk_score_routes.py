@@ -74,6 +74,22 @@ def assess(
         timings["intake"] = round((perf_counter() - started) * 1000, 2)
         if not quality_result["acceptable"]:
             return {"risk_score": 100.0, "risk_label": "HIGH", "component_scores": {"quality": 100.0}, "flags": ["Image quality gate rejected upload: " + ", ".join(quality_result["issues"])], "ocr": {"document_type": classification["document_type"], "fields": {}}, "modules": {"quality": quality_result, "classification": classification}}
+
+        # Unknown / Unsupported Document Type Pathway (Requirement 13 & 22)
+        if not classification.get("supported", True) or classification.get("document_type") == "unknown":
+            return {
+                "risk_score": 70.0,
+                "risk_label": "MANUAL_REVIEW",
+                "component_scores": {"classification": 70.0, "quality": quality_result.get("overall_score", 100.0)},
+                "flags": ["UNSUPPORTED_DOCUMENT_TYPE: Input document type could not be verified against recognized government categories (Passport, Visa, National ID, Driving License, Permit). Routed for manual officer inspection."],
+                "ocr": {"document_type": "unknown", "fields": {}},
+                "modules": {
+                    "quality": quality_result,
+                    "classification": classification,
+                },
+                "status": "UNSUPPORTED_DOCUMENT_MANUAL_REVIEW",
+            }
+
         corrected_path = None
         try:
             corrected, was_corrected, _ = correct_perspective(doc_temp_path)
@@ -131,6 +147,10 @@ def assess(
             evidence_path=None,
             face_vector=face_vec,
         )
+
+        # Ensure biometric face embedding is registered to the canonical person.id
+        if face_vec and embedding and not embedding.get("error"):
+            register_face_embedding(person.id, face_vec, embedding["hash"], db)
 
         # 7. Cross-Document Consistency Checking (against trusted/verified records)
         comparisons_data, cross_doc_points, cross_doc_flags = compare_cross_document_consistency(

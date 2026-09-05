@@ -1,0 +1,104 @@
+/* ==========================================================================
+   DocShield AI — Continuous Announcement Ticker
+   Thin, seamless infinite marquee, pause on hover, reduced motion support.
+   ========================================================================== */
+
+.gov-ticker {
+  width: 100%;
+  background: #07152B;
+  color: #F8FAFC;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  height: 38px;
+  position: relative;
+  z-index: 15;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+.gov-ticker__badge {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #0D2244;
+  color: #E5A93C;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 0 14px;
+  height: 100%;
+  border-right: 1px solid rgba(229, 169, 60, 0.3);
+  white-space: nowrap;
+  z-index: 2;
+}
+
+.gov-ticker__badge-icon {
+  color: #E5A93C;
+}
+
+.gov-ticker__track-wrapper {
+  flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  position: relative;
+  mask-image: linear-gradient(to right, transparent, black 20px, black calc(100% - 20px), transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 20px, black calc(100% - 20px), transparent);
+}
+
+.gov-ticker__track {
+  display: flex;
+  width: max-content;
+  animation: tickerMarquee 115s linear infinite;
+  will-change: transform;
+}
+
+.gov-ticker:hover .gov-ticker__track {
+  animation-play-state: paused;
+}
+
+.gov-ticker__items {
+  display: flex;
+  align-items: center;
+}
+
+.gov-ticker__item {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #E2E8F0;
+  letter-spacing: 0.015em;
+  padding: 0 1.25rem;
+}
+
+.gov-ticker__dot {
+  color: #E5A93C;
+  font-weight: 800;
+  margin-right: 0.75rem;
+  font-size: 0.9rem;
+}
+
+@keyframes tickerMarquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .gov-ticker__track {
+    animation: none !important;
+    transform: none !important;
+  }
+  .gov-ticker__track-wrapper {
+    overflow-x: auto;
+  }
+}

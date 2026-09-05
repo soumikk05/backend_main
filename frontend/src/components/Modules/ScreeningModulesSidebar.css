@@ -1,0 +1,181 @@
+/* Cyber Screening Modules Panel */
+.screening-modules-panel {
+  width: 280px;
+  background: rgba(11, 23, 42, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(6, 182, 212, 0.25);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4), 0 0 20px rgba(6, 182, 212, 0.08);
+  display: flex;
+  flex-direction: column;
+  padding: 1.15rem;
+  position: sticky;
+  top: 96px;
+  flex-shrink: 0;
+}
+
+.screening-modules-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 0.85rem;
+  margin-bottom: 0.85rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.screening-modules-panel__title {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #94a3b8;
+}
+
+.screening-modules-panel__active-badge {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+}
+
+.screening-modules-panel__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.screening-modules-panel__item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 0.85rem;
+  border-radius: 10px;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.825rem;
+  color: #94a3b8;
+  background: transparent;
+  border: 1px solid transparent;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+  text-align: left;
+  cursor: pointer;
+  width: 100%;
+}
+
+.screening-modules-panel__item:hover {
+  color: #f8fafc;
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.screening-modules-panel__item--active {
+  color: #38bdf8;
+  background: rgba(14, 165, 233, 0.12);
+  border-color: rgba(14, 165, 233, 0.4);
+  box-shadow: 0 0 20px rgba(14, 165, 233, 0.18), inset 0 0 12px rgba(14, 165, 233, 0.08);
+}
+
+.screening-modules-panel__item--active .screening-modules-panel__icon {
+  color: #38bdf8;
+  filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.6));
+}
+
+.screening-modules-panel__icon {
+  color: #64748b;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.screening-modules-panel__label-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.screening-modules-panel__label-title {
+  font-weight: 600;
+  font-size: 0.825rem;
+  color: inherit;
+}
+
+.screening-modules-panel__label-sub {
+  font-size: 0.65rem;
+  color: #64748b;
+  line-height: 1.2;
+}
+
+.screening-modules-panel__item--active .screening-modules-panel__label-sub {
+  color: #7dd3fc;
+}
+
+.screening-modules-panel__badge {
+  font-size: 0.62rem;
+  padding: 0.15rem 0.35rem;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #64748b;
+  font-weight: 600;
+}
+
+.screening-modules-panel__item--active .screening-modules-panel__badge {
+  background: rgba(14, 165, 233, 0.25);
+  border-color: rgba(14, 165, 233, 0.5);
+  color: #38bdf8;
+}
+
+.screening-modules-panel__active-indicator {
+  position: absolute;
+  left: 0;
+  top: 15%;
+  bottom: 15%;
+  width: 3px;
+  background: #38bdf8;
+  border-radius: 0 4px 4px 0;
+  box-shadow: 0 0 8px #38bdf8;
+}
+
+/* Footer health & latency */
+.screening-modules-panel__footer {
+  margin-top: 1.25rem;
+  padding: 0.75rem 0.85rem;
+  background: rgba(3, 7, 18, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.7rem;
+}
+
+.screening-modules-panel__footer-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@media (max-width: 1024px) {
+  .screening-modules-panel {
+    width: 100%;
+    position: static;
+    margin-bottom: 1.5rem;
+  }
+
+  .screening-modules-panel__nav {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 0.5rem;
+  }
+}

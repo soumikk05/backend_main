@@ -1,0 +1,180 @@
+/* ============================================================
+   Animated Background — grid, orbs, scanline, noise
+   ============================================================ */
+
+.animated-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.animated-bg__circuit {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+/* --- Perspective grid --- */
+.animated-bg__grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(59,130,246,.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(59,130,246,.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black 20%, transparent 70%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black 20%, transparent 70%);
+  animation: gridPulse 8s ease-in-out infinite;
+}
+
+@keyframes gridPulse {
+  0%, 100% { opacity: 0.6; }
+  50%      { opacity: 1; }
+}
+
+/* --- Floating gradient orbs --- */
+.animated-bg__orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.5;
+  will-change: transform;
+}
+
+.animated-bg__orb--1 {
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(59,130,246,.15) 0%, transparent 70%);
+  top: -10%;
+  left: -5%;
+  animation: orbFloat1 20s ease-in-out infinite;
+}
+
+.animated-bg__orb--2 {
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(139,92,246,.12) 0%, transparent 70%);
+  bottom: -5%;
+  right: -5%;
+  animation: orbFloat2 25s ease-in-out infinite;
+}
+
+.animated-bg__orb--3 {
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(16,185,129,.08) 0%, transparent 70%);
+  top: 50%;
+  left: 60%;
+  animation: orbFloat3 18s ease-in-out infinite;
+}
+
+.animated-bg__orb--4 {
+  width: 250px;
+  height: 250px;
+  background: radial-gradient(circle, rgba(236,72,153,.06) 0%, transparent 70%);
+  top: 30%;
+  left: 10%;
+  animation: orbFloat4 22s ease-in-out infinite;
+}
+
+@keyframes orbFloat1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25%      { transform: translate(80px, 40px) scale(1.1); }
+  50%      { transform: translate(30px, 80px) scale(0.95); }
+  75%      { transform: translate(-40px, 20px) scale(1.05); }
+}
+
+@keyframes orbFloat2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25%      { transform: translate(-60px, -30px) scale(1.05); }
+  50%      { transform: translate(-30px, -70px) scale(1.1); }
+  75%      { transform: translate(40px, -20px) scale(0.95); }
+}
+
+@keyframes orbFloat3 {
+  0%, 100% { transform: translate(0, 0); }
+  33%      { transform: translate(-50px, 40px); }
+  66%      { transform: translate(30px, -30px); }
+}
+
+@keyframes orbFloat4 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%      { transform: translate(60px, -50px) scale(1.15); }
+}
+
+/* --- Horizontal scanline --- */
+.animated-bg__scanline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(59,130,246,.15) 20%,
+    rgba(59,130,246,.3) 50%,
+    rgba(59,130,246,.15) 80%,
+    transparent 100%
+  );
+  animation: bgScanline 8s linear infinite;
+  opacity: 0.6;
+}
+
+@keyframes bgScanline {
+  0%   { top: -2px; }
+  100% { top: 100%; }
+}
+
+/* --- Noise grain overlay --- */
+.animated-bg__noise {
+  position: absolute;
+  inset: 0;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 128px 128px;
+}
+
+/* ============================================================
+   Animated Text — word-by-word reveal
+   ============================================================ */
+
+.animated-text {
+  display: inline;
+}
+
+.anim-word {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(14px) rotateX(40deg);
+  animation: wordReveal 0.5s var(--ease-out) forwards;
+  transform-origin: bottom center;
+}
+
+@keyframes wordReveal {
+  to {
+    opacity: 1;
+    transform: translateY(0) rotateX(0deg);
+  }
+}
+
+/* ============================================================
+   Reduced motion
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .animated-bg__orb,
+  .animated-bg__grid,
+  .animated-bg__scanline {
+    animation: none !important;
+  }
+  .animated-bg__orb { opacity: 0.3; }
+  .anim-word {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+  }
+}

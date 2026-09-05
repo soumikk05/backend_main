@@ -24,7 +24,7 @@ def _load_model():
         return None
 
 
-def preprocess_image_for_classifier(image: np.ndarray, target_size=(224, 224)) -> np.ndarray:
+def preprocess_image_for_classifier(image: np.ndarray, target_size=(128, 128)) -> np.ndarray:
     """Standardize input image dimensions and RGB normalization."""
     rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     resized = cv2.resize(rgb, target_size)

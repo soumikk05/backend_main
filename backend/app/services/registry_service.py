@@ -9,7 +9,8 @@ from sqlalchemy.orm import Session
 
 from app.config import REGISTRY_BLACKLIST_HIT_POINTS, REGISTRY_DUPLICATE_HIT_POINTS
 from app.models.database import BlacklistedDocument, ScreeningRecord, FaceEmbedding, IdentityCluster
-from app.services.privacy_service import lookup_hash
+from app.services.privacy_service import lookup_hash, normalize_doc_number
+from app.services.cross_document_service import _normalize_date_str, _compare_dates_normalized, _compare_names_fuzzy
 
 logger = logging.getLogger(__name__)
 
@@ -81,42 +82,48 @@ def check_duplicate_identity(
     is_duplicate = False
 
     try:
-        clean_doc = document_number.strip().upper() if document_number else None
-        clean_name = holder_name.strip().upper() if holder_name else None
-        clean_dob = date_of_birth.strip() if date_of_birth else None
+        clean_doc = normalize_doc_number(document_number)
+        clean_name = holder_name.strip() if holder_name else None
+        clean_dob = _normalize_date_str(date_of_birth)
 
-        # Pattern 1: Same document number with different holder name
+        # Pattern 1: Same document number with different holder name or altered DOB
         if clean_doc:
+            doc_h = lookup_hash(clean_doc)
             prior_records = db.query(ScreeningRecord).filter(
-                (ScreeningRecord.document_number == clean_doc) | (ScreeningRecord.document_number_hash == lookup_hash(clean_doc))
+                (ScreeningRecord.document_number == clean_doc) | 
+                (ScreeningRecord.document_number_hash == doc_h)
             ).limit(10).all()
 
             for rec in prior_records:
-                prior_name = (rec.holder_name or "").strip().upper()
-                if clean_name and prior_name and prior_name != clean_name:
-                    is_duplicate = True
-                    matched_ids.append(rec.id)
-                    flags.append(
-                        f"DUPLICATE IDENTITY CONFLICT: Document number {clean_doc} previously screened under name '{rec.holder_name}'"
-                    )
+                prior_name = rec.holder_name
+                if clean_name and prior_name:
+                    name_match, _ = _compare_names_fuzzy(clean_name, prior_name)
+                    if not name_match:
+                        is_duplicate = True
+                        matched_ids.append(rec.id)
+                        flags.append(
+                            f"DUPLICATE IDENTITY CONFLICT: Document number {clean_doc} previously screened under name '{rec.holder_name}'"
+                        )
 
-                # Pattern 1b: Same document number, same/blank name, but conflicting date of birth
-                prior_dob = (rec.date_of_birth or "").strip()
-                if clean_dob and prior_dob and prior_dob != clean_dob:
+                # Pattern 1b: Same document number with conflicting date of birth
+                prior_dob = _normalize_date_str(rec.date_of_birth)
+                if clean_dob and prior_dob and not _compare_dates_normalized(clean_dob, prior_dob):
                     is_duplicate = True
                     matched_ids.append(rec.id)
                     flags.append(
-                        f"IDENTITY DOB MISMATCH: Document number {clean_doc} previously screened with date of birth '{rec.date_of_birth}', now presented as '{clean_dob}'"
+                        f"CRITICAL_TAMPERING_CONFLICT: Document number {clean_doc} previously screened with date of birth '{prior_dob}', now presented with forged date of birth '{clean_dob}'"
                     )
 
         # Pattern 2: Same person name with different document number
         if clean_name and len(clean_name) > 3:
+            name_h = lookup_hash(clean_name)
             prior_name_records = db.query(ScreeningRecord).filter(
-                (ScreeningRecord.holder_name == clean_name) | (ScreeningRecord.holder_name_hash == lookup_hash(clean_name))
+                (ScreeningRecord.holder_name == clean_name) | 
+                (ScreeningRecord.holder_name_hash == name_h)
             ).limit(10).all()
 
             for rec in prior_name_records:
-                prior_doc = (rec.document_number or "").strip().upper()
+                prior_doc = normalize_doc_number(rec.document_number)
                 if clean_doc and prior_doc and prior_doc != clean_doc:
                     is_duplicate = True
                     matched_ids.append(rec.id)
@@ -125,12 +132,12 @@ def check_duplicate_identity(
                     )
 
                 # Pattern 2b: Same name, but conflicting date of birth (possible impersonation)
-                prior_dob = (rec.date_of_birth or "").strip()
-                if clean_dob and prior_dob and prior_dob != clean_dob:
+                prior_dob = _normalize_date_str(rec.date_of_birth)
+                if clean_dob and prior_dob and not _compare_dates_normalized(clean_dob, prior_dob):
                     is_duplicate = True
                     matched_ids.append(rec.id)
                     flags.append(
-                        f"IDENTITY DOB MISMATCH: Person '{holder_name}' previously screened with date of birth '{rec.date_of_birth}', now presented as '{clean_dob}'"
+                        f"IDENTITY DOB MISMATCH: Person '{holder_name}' previously screened with date of birth '{prior_dob}', now presented as '{clean_dob}'"
                     )
 
         # Pattern 3: Image replay hash collision with different document number

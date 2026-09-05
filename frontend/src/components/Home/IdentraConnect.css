@@ -1,0 +1,625 @@
+/* ==========================================================================
+   Identra / MyGov Connect — National Security & Citizen Engagement Section
+   Exact visual match for government engagement cards (Screenshot 2).
+   ========================================================================== */
+
+.identra-connect {
+  background: #EEF2F8;
+  padding: 3rem 0 3.5rem 0;
+  border-top: 1px solid #E2E8F0;
+  border-bottom: 1px solid #E2E8F0;
+}
+
+/* Section Header */
+.identra-connect__header {
+  text-align: center;
+  max-width: 760px;
+  margin: 0 auto 2.25rem auto;
+}
+
+.identra-connect__title {
+  font-size: 1.65rem;
+  font-weight: 800;
+  color: #0A192F;
+  margin: 0 0 0.4rem 0;
+  letter-spacing: -0.02em;
+}
+
+.identra-connect__line {
+  width: 54px;
+  height: 3px;
+  background: #1B365D;
+  margin: 0.35rem auto 0.65rem auto;
+  border-radius: 2px;
+}
+
+.identra-connect__subtitle {
+  font-size: 0.9375rem;
+  color: #475569;
+  margin: 0 0 1.25rem 0;
+}
+
+/* Filter Pills */
+.identra-connect__filters {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #E2E8F0;
+  padding: 4px;
+  border-radius: 9999px;
+}
+
+.identra-connect__filter-btn {
+  background: transparent;
+  border: none;
+  font-size: 0.78125rem;
+  font-weight: 600;
+  color: #475569;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all 0.15s ease;
+}
+
+.identra-connect__filter-btn:hover {
+  color: #0A192F;
+}
+
+.identra-connect__filter-btn--active {
+  background: #0A192F;
+  color: #FFFFFF !important;
+  box-shadow: 0 2px 8px rgba(10, 25, 47, 0.25);
+}
+
+/* 3-Card Grid matching Screenshot 2 */
+.identra-connect__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  max-width: 1240px;
+  margin: 0 auto;
+}
+
+.identra-connect__card {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+}
+
+.identra-connect__card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
+  border-color: #CBD5E1;
+}
+
+/* Card Thumbnail */
+.identra-connect__img-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #0A192F;
+  overflow: hidden;
+}
+
+.identra-connect__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.identra-connect__card:hover .identra-connect__img {
+  transform: scale(1.03);
+}
+
+.identra-connect__badge-corner {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(10, 25, 47, 0.85);
+  backdrop-filter: blur(4px);
+  color: #E5A93C;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.02em;
+  border: 1px solid rgba(229, 169, 60, 0.4);
+}
+
+/* Card Body */
+.identra-connect__body {
+  padding: 1.25rem 1.35rem 1.25rem 1.35rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.identra-connect__tag-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.identra-connect__tag {
+  color: #FFFFFF;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  padding: 2px 8px;
+  border-radius: 3px;
+  text-transform: uppercase;
+}
+
+.identra-connect__date {
+  font-size: 0.75rem;
+  color: #64748B;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.identra-connect__card-title {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #0F172A;
+  line-height: 1.4;
+  margin: 0 0 0.5rem 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.identra-connect__card-desc {
+  font-size: 0.8125rem;
+  color: #475569;
+  line-height: 1.5;
+  margin: 0 0 1rem 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  flex: 1;
+}
+
+.identra-connect__card-footer {
+  margin-top: auto;
+  padding-top: 0.75rem;
+  border-top: 1px solid #F1F5F9;
+}
+
+.identra-connect__action-btn {
+  background: transparent;
+  border: none;
+  color: #1E3A8A;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: color 0.15s ease;
+}
+
+.identra-connect__action-btn:hover {
+  color: #D97706;
+}
+
+.identra-connect__arrow {
+  transition: transform 0.15s ease;
+}
+
+.identra-connect__card:hover .identra-connect__arrow {
+  transform: translateX(4px);
+}
+
+/* Footer & Centered View All Button */
+.identra-connect__footer {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.identra-connect__view-all-btn {
+  background: #FFFFFF;
+  border: 1px solid #CBD5E1;
+  color: #0F172A;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  padding: 0.55rem 1.75rem;
+  border-radius: 9999px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  transition: all 0.15s ease;
+}
+
+.identra-connect__view-all-btn:hover {
+  background: #0A192F;
+  color: #FFFFFF;
+  border-color: #0A192F;
+}
+
+.identra-connect__view-all-icon {
+  transition: transform 0.2s ease;
+}
+
+.identra-connect__view-all-icon--up {
+  transform: rotate(-90deg);
+}
+
+/* ==========================================================================
+   Interactive Working Modal Styles
+   ========================================================================== */
+
+.identra-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 25, 47, 0.75);
+  backdrop-filter: blur(5px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.identra-modal {
+  background: #FFFFFF;
+  border-radius: 12px;
+  max-width: 680px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
+  display: flex;
+  flex-direction: column;
+}
+
+.identra-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #E2E8F0;
+  background: #F8FAFC;
+}
+
+.identra-modal__header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.identra-modal__header-badge {
+  font-size: 0.75rem;
+  color: #64748B;
+  font-weight: 600;
+}
+
+.identra-modal__close {
+  background: transparent;
+  border: none;
+  color: #64748B;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: color 0.15s ease;
+}
+
+.identra-modal__close:hover {
+  color: #0F172A;
+}
+
+.identra-modal__media {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #0A192F;
+}
+
+.identra-modal__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.identra-modal__body {
+  padding: 1.5rem;
+}
+
+.identra-modal__title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #0A192F;
+  line-height: 1.35;
+  margin: 0 0 0.5rem 0;
+}
+
+.identra-modal__desc {
+  font-size: 0.875rem;
+  color: #475569;
+  line-height: 1.6;
+  margin: 0 0 1.5rem 0;
+}
+
+.identra-modal__interactive-block {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.identra-modal__block-title {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #0F172A;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0 0 1rem 0;
+}
+
+/* Quiz Form */
+.identra-modal__question {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1E293B;
+  margin-bottom: 0.75rem;
+}
+
+.identra-modal__options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.identra-modal__option-label {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.65rem 0.85rem;
+  background: #FFFFFF;
+  border: 1px solid #CBD5E1;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8125rem;
+  color: #1E293B;
+  transition: all 0.15s ease;
+}
+
+.identra-modal__option-label:hover {
+  background: #F1F5F9;
+  border-color: #94A3B8;
+}
+
+.identra-modal__option-label--selected {
+  background: #EFF6FF;
+  border-color: #2563EB;
+  color: #1E3A8A;
+  font-weight: 600;
+}
+
+/* Stream Player */
+.identra-modal__player {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.identra-modal__player-screen {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background: #000000;
+  border-radius: 6px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.identra-modal__play-icon {
+  color: #E5A93C;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.identra-modal__play-icon:hover {
+  transform: scale(1.1);
+}
+
+.identra-modal__play-icon--active {
+  color: #16A34A;
+}
+
+.identra-modal__player-overlay {
+  position: absolute;
+  bottom: 10px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #FFFFFF;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.identra-modal__live-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #DC2626;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+}
+
+.identra-modal__live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #FFFFFF;
+}
+
+.identra-modal__highlights {
+  margin-top: 0.85rem;
+  font-size: 0.8125rem;
+  color: #475569;
+}
+
+.identra-modal__highlights ul {
+  padding-left: 1.25rem;
+  margin: 0.35rem 0 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+/* Contest Form */
+.identra-modal__contest-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.identra-modal__form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.identra-modal__form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.identra-modal__form-field label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.identra-modal__form-field input {
+  padding: 0.55rem 0.75rem;
+  border: 1px solid #CBD5E1;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  color: #0F172A;
+  outline: none;
+}
+
+.identra-modal__form-field input:focus {
+  border-color: #1E3A8A;
+}
+
+.identra-modal__guidelines {
+  font-size: 0.75rem;
+  color: #64748B;
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Submit & Result */
+.identra-modal__submit-btn {
+  background: #0A192F;
+  color: #FFFFFF;
+  border: none;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  padding: 0.65rem 1.25rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  width: 100%;
+}
+
+.identra-modal__submit-btn:hover {
+  background: #1B365D;
+}
+
+.identra-modal__result {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  background: #F0FDF4;
+  border: 1px solid #BBF7D0;
+  border-radius: 6px;
+  padding: 1rem;
+}
+
+.identra-modal__result strong {
+  font-size: 0.875rem;
+  color: #166534;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.identra-modal__result p {
+  font-size: 0.8125rem;
+  color: #15803D;
+  margin: 0 0 0.5rem 0;
+  line-height: 1.45;
+}
+
+.identra-modal__footer {
+  padding: 0.85rem 1.5rem;
+  border-top: 1px solid #E2E8F0;
+  display: flex;
+  justify-content: flex-end;
+  background: #F8FAFC;
+}
+
+.identra-modal__btn-secondary {
+  background: transparent;
+  border: 1px solid #CBD5E1;
+  color: #334155;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  padding: 6px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.identra-modal__btn-secondary:hover {
+  background: #F1F5F9;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .identra-connect__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .identra-connect {
+    padding: 2rem 0;
+  }
+  .identra-connect__grid {
+    grid-template-columns: 1fr;
+  }
+  .identra-modal__form-row {
+    grid-template-columns: 1fr;
+  }
+}
